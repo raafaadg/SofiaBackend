@@ -1,19 +1,83 @@
 const watson = require('watson-developer-cloud/assistant/v1');
 const prompt = require('prompt-sync')();
-require('dotenv').config;
+require('dotenv').config()
 
 const chatbot = new watson({
-    username: 'a434b24b-056b-4676-9e6c-5362ac72fedb',
-    password: 'zHP7iLqeWquI',
-    version: '2018-02-16',
+    username: process.env.USERNAME_WATSON,
+    password: process.env.PASSWORD,
+    version: process.env.VERSION,
 });
 
-const workspace_id = 'a11b3d53-367c-4b4a-b69d-5b49ccf865b8';
+const workspace_id = process.env.WORKSPACE_ID;
 
 //começando a conversação com uma mensagem vazia
 chatbot.message({workspace_id}, trataResposta);
 
 let fimDeConversar = false;
+
+var params = {
+    workspace_id: process.env.WORKSPACE_ID,
+    intent: 'hello',
+    examples: [
+        {
+            text: 'Good morning'
+        },
+        {
+            text: 'Hi there'
+        }
+    ]
+};
+
+chatbot.createIntent(params, function (err, response) {
+    if (err) {
+        console.error(err);
+    } else {
+        console.log(JSON.stringify(response, null, 2));
+    }
+});
+
+var params2 = {
+    workspace_id: process.env.WORKSPACE_ID,
+    entity: 'beverage',
+    values: [
+        {
+            value: 'water'
+        },
+        {
+            value: 'orange juice'
+        },
+        {
+            value: 'soda'
+        }
+    ]
+};
+
+chatbot.createEntity(params2, function (err, response) {
+    if (err) {
+        console.error(err);
+    } else {
+        console.log(JSON.stringify(response, null, 2));
+    }
+});
+
+var params3 = {
+    workspace_id: process.env.WORKSPACE_ID,
+    dialog_node: 'greeting3',
+    conditions: '#hello',
+    output: {
+        text: 'Hi! How can I help you?'
+    },
+    title: 'Greeting2',
+    parent: "greeting2"
+};
+
+chatbot.createDialogNode(params3, function (err, response) {
+    if (err) {
+        console.error(err);
+    } else {
+        console.log(JSON.stringify(response, null, 2));
+    }
+});
 
 function trataResposta(err, resposta){
     if (err) {
@@ -28,7 +92,7 @@ function trataResposta(err, resposta){
         }
     }
     //exibe toda a json 
-    // console.log(resposta)
+    console.log(resposta)
 
     if (resposta.output.text.length > 0) {
         console.log(resposta.output.text[0])
