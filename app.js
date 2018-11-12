@@ -62,13 +62,12 @@ chatbot.createEntity(params2, function (err, response) {
 
 var params3 = {
     workspace_id: process.env.WORKSPACE_ID,
-    dialog_node: 'greeting3',
+    dialog_node: 'greeting4',
     conditions: '#hello',
     output: {
         text: 'Hi! How can I help you?'
     },
-    title: 'Greeting2',
-    parent: "greeting2"
+    title: 'Greeting2'
 };
 
 chatbot.createDialogNode(params3, function (err, response) {
