@@ -1,4 +1,28 @@
-function createNewIntent() {
+module.exports = {
+    createNewEntity,
+    createNewIntent,
+    createNewDialog,
+    trataResposta,
+    listWorkspaces
+}
+var prompt = require('prompt-sync')();
+require('dotenv').config();
+var watson = require('watson-developer-cloud/assistant/v1');
+var chatbot = new watson({
+    username: process.env.USERNAME_WATSON,
+    password: process.env.PASSWORD,
+    version: process.env.VERSION,
+});
+let fimDeConversar = false;
+
+function createNewIntent(workspace_id, intent, examples, description) {
+
+    var params = {
+        workspace_id,
+        intent,
+        examples,
+        description
+    };
     chatbot.createIntent(params, function (err, response) {
         if (err) {
             console.error(err);
@@ -8,8 +32,16 @@ function createNewIntent() {
     });
 };
 
-function createNewEntity() {
-    chatbot.createEntity(params2, function (err, response) {
+function createNewEntity(workspace_id, entity, values,description) {
+    var params = {
+        workspace_id,
+        entity,
+        values,
+        fuzzy_match: true,
+        description
+    };
+        
+    chatbot.createEntity(params, function (err, response) {
         if (err) {
             console.error(err);
         } else {
@@ -18,8 +50,46 @@ function createNewEntity() {
     });
 }
 
-function createNewDialog() {
-    chatbot.createDialogNode(params3, function (err, response) {
+function createNewDialog(
+    workspace_id,
+    dialog_node,
+    conditions,
+    output,
+    title,
+    description,
+    parent,
+    next_step,
+    previous_sibling,
+    context,
+    actions,
+    node_type,
+    event_name,
+    variable,
+    digress_in,
+    digress_out_slots,
+    user_label
+) {
+
+    var params = {
+        workspace_id,
+        dialog_node,
+        description,
+        conditions,
+        parent,
+        previous_sibling,
+        output,
+        title,
+        context,
+        next_step,
+        actions,
+        node_type,
+        event_name,
+        variable,
+        digress_in,
+        digress_out_slots,
+        user_label
+    };
+    chatbot.createDialogNode(params, function (err, response) {
         if (err) {
             console.error(err);
         } else {
@@ -57,4 +127,19 @@ function trataResposta(err, resposta) {
             context: resposta.context
         }, trataResposta);
     }
+}
+function listWorkspaces(){
+    chatbot.listWorkspaces(function (err, response) {
+        if (err) {
+            console.error(err);
+        } else {
+            // var jsonAUX = JSON.stringify(response, null, 2),
+            //   key;
+            // console.log(JSON.stringify(response, null, 2));
+            var jsonAUX = JSON.parse(JSON.stringify(response, null, 2));
+            console.log(jsonAUX.workspaces[0]);
+            for (key in jsonAUX.workspaces)
+                console.log(jsonAUX.workspaces[key].workspace_id);
+        }
+    });
 }

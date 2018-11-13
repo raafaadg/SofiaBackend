@@ -1,13 +1,5 @@
-var watson = require('watson-developer-cloud/assistant/v1');
-var prompt = require('prompt-sync')();
-require('dotenv').config();
-require('./functions')
+var fun = require('./functions');
 
-var chatbot = new watson({
-    username: process.env.USERNAME_WATSON,
-    password: process.env.PASSWORD,
-    version: process.env.VERSION,
-});
 
 var workspace_id = process.env.WORKSPACE_ID;
 
@@ -16,55 +8,27 @@ var workspace_id = process.env.WORKSPACE_ID;
 
 let fimDeConversar = false;
 
-var params = {
-    workspace_id,
-    intent: 'hello',
-    examples: [
-        {
-            text: 'Good morning'
-        },
-        {
-            text: 'Hi there'
-        }
-    ]
-};
+var intentTexts = ['teste','teste2','teste3','teste4'];
+var values = ['water', 'orange juice', 'soda'];
+var synonyms = ['akjdka', 'lsfnakjf', 'ajdkaskjd', 'ksndkj', 'knzkjdn'];
+var out = [], outIntent = [];
+for (var i in values)
+    out.push({ value: values[i], synonyms });
 
-var params2 = {
-    workspace_id,
-    entity: 'beverage',
-    values: [
-        {
-            value: 'water'
-        },
-        {
-            value: 'orange juice'
-        },
-        {
-            value: 'soda'
-        }
-    ]
-};
+for (var i in intentTexts)
+    outIntent.push({ text: intentTexts[i] });
 
-var params3 = {
-    workspace_id,
-    dialog_node: 'greeting',
-    conditions: '#hello',
-    output: {
-        text: 'Hi! How can I help you?'
-    },
-    title: 'Greeting2'
-};
+// fun.createNewEntity(workspace_id, "EntidadeTeste3", out,"descrição teste");
+// fun.createNewIntent(workspace_id, "Intencao", outIntent);
 
-chatbot.listWorkspaces(function (err, response) {
-    if (err) {
-        console.error(err);
-    } else {
-        // var jsonAUX = JSON.stringify(response, null, 2),
-        //   key;
-        // console.log(JSON.stringify(response, null, 2));
-        var jsonAUX = JSON.parse(JSON.stringify(response, null, 2));
-        console.log(jsonAUX.workspaces[0]);
-        for (key in jsonAUX.workspaces) 
-            console.log(jsonAUX.workspaces[key].workspace_id);        
-    }
-});
+fun.createNewDialog(
+    workspace_id, 
+    "dialog_teste4", 
+    "#Intencao",
+    { text: 'Teste Outpu1', text: 'Teste Outpu4', text: 'Teste Outpu4'},
+    "Titulo Teste4",
+    "Descrição Teste4",
+    undefined,
+    undefined,
+    "Bem-vindo")
+
