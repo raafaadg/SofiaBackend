@@ -1,22 +1,23 @@
-const watson = require('watson-developer-cloud/assistant/v1');
-const prompt = require('prompt-sync')();
-require('dotenv').config()
+var watson = require('watson-developer-cloud/assistant/v1');
+var prompt = require('prompt-sync')();
+require('dotenv').config();
+require('./functions')
 
-const chatbot = new watson({
+var chatbot = new watson({
     username: process.env.USERNAME_WATSON,
     password: process.env.PASSWORD,
     version: process.env.VERSION,
 });
 
-const workspace_id = process.env.WORKSPACE_ID;
+var workspace_id = process.env.WORKSPACE_ID;
 
 //começando a conversação com uma mensagem vazia
-chatbot.message({workspace_id}, trataResposta);
+//chatbot.message({workspace_id}, trataResposta);
 
 let fimDeConversar = false;
 
 var params = {
-    workspace_id: process.env.WORKSPACE_ID,
+    workspace_id,
     intent: 'hello',
     examples: [
         {
@@ -28,16 +29,8 @@ var params = {
     ]
 };
 
-chatbot.createIntent(params, function (err, response) {
-    if (err) {
-        console.error(err);
-    } else {
-        console.log(JSON.stringify(response, null, 2));
-    }
-});
-
 var params2 = {
-    workspace_id: process.env.WORKSPACE_ID,
+    workspace_id,
     entity: 'beverage',
     values: [
         {
@@ -52,17 +45,9 @@ var params2 = {
     ]
 };
 
-chatbot.createEntity(params2, function (err, response) {
-    if (err) {
-        console.error(err);
-    } else {
-        console.log(JSON.stringify(response, null, 2));
-    }
-});
-
 var params3 = {
-    workspace_id: process.env.WORKSPACE_ID,
-    dialog_node: 'greeting4',
+    workspace_id,
+    dialog_node: 'greeting',
     conditions: '#hello',
     output: {
         text: 'Hi! How can I help you?'
@@ -70,39 +55,16 @@ var params3 = {
     title: 'Greeting2'
 };
 
-chatbot.createDialogNode(params3, function (err, response) {
+chatbot.listWorkspaces(function (err, response) {
     if (err) {
         console.error(err);
     } else {
-        console.log(JSON.stringify(response, null, 2));
+        // var jsonAUX = JSON.stringify(response, null, 2),
+        //   key;
+        // console.log(JSON.stringify(response, null, 2));
+        var jsonAUX = JSON.parse(JSON.stringify(response, null, 2));
+        console.log(jsonAUX.workspaces[0]);
+        for (key in jsonAUX.workspaces) 
+            console.log(jsonAUX.workspaces[key].workspace_id);        
     }
 });
-
-function trataResposta(err, resposta){
-    if (err) {
-        console.log(err);
-        return;        
-    }
-
-    if (resposta.intents.length) {
-        console.log('Eu detectei a inteção: ' + resposta.intents[0].intent);
-        if (resposta.intents[0].intent == 'General_Ending'){
-            fimDeConversar = true;
-        }
-    }
-    //exibe toda a json 
-    console.log(resposta)
-
-    if (resposta.output.text.length > 0) {
-        console.log(resposta.output.text[0])
-    }
-
-    if(!fimDeConversar){
-        const mensagemUsuario = prompt('>>');
-        chatbot.message({
-            workspace_id,
-            input: {text: mensagemUsuario},
-            context: resposta.context
-        }, trataResposta);
-    }
-}
