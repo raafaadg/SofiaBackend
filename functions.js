@@ -3,7 +3,10 @@ module.exports = {
     createNewIntent,
     createNewDialog,
     trataResposta,
-    listWorkspaces
+    listWorkspaces,
+    listDialogs,
+    generateEntity,
+    generateIntent
 }
 var prompt = require('prompt-sync')();
 require('dotenv').config();
@@ -15,6 +18,37 @@ var chatbot = new watson({
 });
 let fimDeConversar = false;
 
+function generateEntity(obj){
+    var out = [];
+    for (var i in obj.entities)
+        out.push({
+            value: obj.entities[i],
+            synonyms: obj[obj.entities[i]]
+        });
+        return out;
+}
+
+function generateIntent(obj) {
+    var out = [];
+    for (var i in obj.examples)
+        out.push({
+            text: obj.examples[i]
+        });
+    return out;
+}
+function listDialogs(workspace_id){
+    var params = {
+        workspace_id,
+    };
+
+    chatbot.listDialogNodes(params, function (err, response) {
+        if (err) {
+            console.error(err);
+        } else {
+            console.log(JSON.stringify(response, null, 2));
+        }
+    });
+}
 function createNewIntent(workspace_id, intent, examples, description) {
 
     var params = {
@@ -61,11 +95,12 @@ function createNewDialog(
     next_step,
     previous_sibling,
     context,
+    node_type, 
+    digress_in,
+    digress_out,
     actions,
-    node_type,
     event_name,
     variable,
-    digress_in,
     digress_out_slots,
     user_label
 ) {
@@ -86,6 +121,7 @@ function createNewDialog(
         event_name,
         variable,
         digress_in,
+        digress_out,
         digress_out_slots,
         user_label
     };
