@@ -1,4 +1,5 @@
 module.exports = {
+    chatbot,
     createNewEntity,
     createNewIntent,
     createNewDialog,
@@ -6,7 +7,9 @@ module.exports = {
     listWorkspaces,
     listDialogs,
     generateEntity,
-    generateIntent
+    generateIntent,
+    skillObject,
+    updateDialog
 }
 var prompt = require('prompt-sync')();
 require('dotenv').config();
@@ -84,56 +87,6 @@ function createNewEntity(workspace_id, entity, values,description) {
     });
 }
 
-function createNewDialog(
-    workspace_id,
-    dialog_node,
-    conditions,
-    output,
-    title,
-    description,
-    parent,
-    next_step,
-    previous_sibling,
-    context,
-    node_type, 
-    digress_in,
-    digress_out,
-    actions,
-    event_name,
-    variable,
-    digress_out_slots,
-    user_label
-) {
-
-    var params = {
-        workspace_id,
-        dialog_node,
-        description,
-        conditions,
-        parent,
-        previous_sibling,
-        output,
-        title,
-        context,
-        next_step,
-        actions,
-        node_type,
-        event_name,
-        variable,
-        digress_in,
-        digress_out,
-        digress_out_slots,
-        user_label
-    };
-    chatbot.createDialogNode(params, function (err, response) {
-        if (err) {
-            console.error(err);
-        } else {
-            console.log(JSON.stringify(response, null, 2));
-        }
-    });
-}
-
 function trataResposta(err, resposta) {
     if (err) {
         console.log(err);
@@ -176,6 +129,76 @@ function listWorkspaces(){
             console.log(jsonAUX.workspaces[0]);
             for (key in jsonAUX.workspaces)
                 console.log(jsonAUX.workspaces[key].workspace_id);
+        }
+    });
+}
+
+
+function skillObject(
+    workspace_id,
+    dialog_node,
+    conditions,
+    output,
+    title,
+    description,
+    parent,
+    next_step,
+    previous_sibling,
+    context,
+    node_type,
+    digress_in,
+    digress_out,
+    metadata,
+    digress_out_slots,
+    variable,
+    event_name,
+    actions,
+    user_label
+) {
+    var obj = new Object();
+    obj.workspace_id = workspace_id;
+    obj.dialog_node = dialog_node;
+    obj.new_conditions = conditions;
+    obj.new_output = output;
+    obj.new_title = title;
+    obj.new_description = description;
+    obj.new_parent = parent;
+    obj.new_next_step = next_step;
+    obj.new_previous_sibling = previous_sibling;
+    obj.new_context = context;
+    obj.new_type = node_type;
+    obj.new_digress_in = digress_in;
+    obj.new_digress_out = digress_out;
+    obj.new_metadata = metadata;
+    obj.new_digress_out_slots = digress_out_slots;
+    obj.new_variable = variable;
+    obj.new_event_name = event_name;
+    obj.new_actions = actions;
+    obj.user_label = user_label;
+    return obj;
+}
+
+function createNewDialog(obj) {
+    const obj2 = new Object();
+    obj2.workspace_id = obj.workspace_id;
+    obj2.dialog_node = obj.dialog_node;
+    obj2.title = obj.new_title;
+    obj2.description = obj.new_description;
+    chatbot.createDialogNode(obj2, function (err, response) {
+        if (err) {
+            console.error(err);
+        } else {
+            console.log(JSON.stringify(response, null, 2));
+        }
+    });
+}
+
+function updateDialog(obj) {
+    chatbot.updateDialogNode(obj, function (err, response) {
+        if (err) {
+            console.error(err);
+        } else {
+            console.log(JSON.stringify(response, null, 2));
         }
     });
 }
