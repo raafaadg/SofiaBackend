@@ -1,0 +1,456 @@
+{
+    "dialog_nodes": [
+        {
+            "type": "standard",
+            "title": "Em outros casos",
+            "output": {
+                "values": [
+                    {
+                        "text": "Eu não entendi. Você pode tentar reformular a frase."
+                    },
+                    {
+                        "text": "Você pode reformular sua afirmação? Eu não estou entendendo."
+                    },
+                    {
+                        "text": "Eu não entendi o sentido."
+                    }
+                ],
+                "generic": [
+                    {
+                        "values": [
+                            {
+                                "text": "Flw vlw"
+                            }
+                        ],
+                        "response_type": "text",
+                        "selection_policy": "random"
+                    }
+                ],
+                "response_type": "text",
+                "selection_policy": "sequential"
+            },
+            "metadata": {},
+            "conditions": "anything_else || #recusar",
+            "description": "Dialogo Final",
+            "dialog_node": "dialog_end",
+            "previous_sibling": "node_1_1542165421678"
+        },
+        {
+            "type": "standard",
+            "title": "Bem-vindo",
+            "output": {
+                "text": {
+                    "values": [
+                        "Olá. Você estaria disposto a responder um rápido questionário?"
+                    ],
+                    "selection_policy": "sequential"
+                }
+            },
+            "metadata": {},
+            "conditions": "welcome",
+            "description": "Dialogo inical",
+            "dialog_node": "dialog_welcome"
+        },
+        {
+            "type": "event_handler",
+            "parent": "slot_16_1542169291266",
+            "event_name": "input",
+            "dialog_node": "handler_17_1542169291266"
+        },
+        {
+            "type": "event_handler",
+            "output": {},
+            "parent": "slot_16_1542169291266",
+            "event_name": "focus",
+            "dialog_node": "handler_18_1542169291266",
+            "previous_sibling": "handler_17_1542169291266"
+        },
+        {
+            "type": "event_handler",
+            "parent": "slot_3_1542167054346",
+            "context": {
+                "number": "@sys-number"
+            },
+            "conditions": "@sys-number",
+            "event_name": "input",
+            "dialog_node": "handler_4_1542167054346"
+        },
+        {
+            "type": "event_handler",
+            "output": {
+                "text": "Favor informar sua idade"
+            },
+            "parent": "slot_3_1542167054346",
+            "metadata": {},
+            "event_name": "focus",
+            "dialog_node": "handler_5_1542167054346",
+            "previous_sibling": "handler_4_1542167054346"
+        },
+        {
+            "type": "standard",
+            "title": "Dialog Nome",
+            "output": {
+                "generic": [
+                    {
+                        "values": [
+                            {
+                                "text": "Para começarmos, qual o seu nome?"
+                            }
+                        ],
+                        "response_type": "text",
+                        "selection_policy": "sequential"
+                    }
+                ]
+            },
+            "context": {
+                "count_age": 0,
+                "count_car": 0,
+                "count_bran": 0
+            },
+            "metadata": {
+                "fallback": "leave"
+            },
+            "conditions": "#responder",
+            "digress_in": "does_not_return",
+            "dialog_node": "node_1_1542165421678",
+            "digress_out": "allow_all",
+            "previous_sibling": "dialog_welcome"
+        },
+        {
+            "type": "standard",
+            "title": "Dialogo Carro - Marca",
+            "output": {
+                "generic": [
+                    {
+                        "values": [
+                            {
+                                "text": "Qual a marca do seu veículo?"
+                            }
+                        ],
+                        "response_type": "text",
+                        "selection_policy": "sequential"
+                    }
+                ]
+            },
+            "parent": "node_2_1542225409110",
+            "metadata": {},
+            "conditions": "@resposta:sim && $count_bran<2",
+            "dialog_node": "node_1_1542170153991"
+        },
+        {
+            "type": "standard",
+            "title": "Wait for Car Answ",
+            "output": {
+                "generic": [
+                    {
+                        "values": [
+                            {
+                                "text": "Show, você possui um $marcaaCarro."
+                            }
+                        ],
+                        "response_type": "text",
+                        "selection_policy": "sequential"
+                    }
+                ]
+            },
+            "parent": "node_1_1542170153991",
+            "context": {
+                "marca_carro": "<?@marcaCarro.literal?>"
+            },
+            "metadata": {},
+            "conditions": "@marcaCarro",
+            "dialog_node": "node_1_1542170228261"
+        },
+        {
+            "type": "standard",
+            "output": {
+                "generic": [
+                    {
+                        "values": [
+                            {
+                                "text": "Desculpa $name, não entendi, pode reformular?"
+                            }
+                        ],
+                        "response_type": "text",
+                        "selection_policy": "sequential"
+                    }
+                ]
+            },
+            "parent": "node_2_1542225409110",
+            "context": {
+                "contador_marca": "<?$contador_car+1?>"
+            },
+            "metadata": {},
+            "next_step": {
+                "behavior": "jump_to",
+                "selector": "condition",
+                "dialog_node": "node_2_1542225409110"
+            },
+            "conditions": "anything_else && $count_car<2",
+            "dialog_node": "node_1_1542219265155",
+            "previous_sibling": "node_1_1542225834120"
+        },
+        {
+            "type": "standard",
+            "output": {
+                "generic": [
+                    {
+                        "values": [],
+                        "response_type": "text",
+                        "selection_policy": "sequential"
+                    }
+                ]
+            },
+            "parent": "node_2_1542225409110",
+            "metadata": {},
+            "next_step": {
+                "behavior": "jump_to",
+                "selector": "body",
+                "dialog_node": "dialog_end"
+            },
+            "conditions": "@resposta:nao || $count_car>2",
+            "dialog_node": "node_1_1542225834120",
+            "previous_sibling": "node_1_1542170153991"
+        },
+        {
+            "type": "standard",
+            "title": "Ask age",
+            "output": {
+                "generic": [
+                    {
+                        "values": [
+                            {
+                                "text": "Prazer $name, para continuarmos, favor informar sua idade."
+                            }
+                        ],
+                        "response_type": "text",
+                        "selection_policy": "sequential"
+                    }
+                ]
+            },
+            "parent": "node_1_1542165421678",
+            "metadata": {},
+            "conditions": "true && $count_age<2",
+            "dialog_node": "node_19_1542169306252",
+            "previous_sibling": "node_6_1542224483161"
+        },
+        {
+            "type": "standard",
+            "title": "Record age",
+            "output": {
+                "generic": [
+                    {
+                        "values": [
+                            {
+                                "text": "Você possui carro?"
+                            }
+                        ],
+                        "response_type": "text",
+                        "selection_policy": "sequential"
+                    }
+                ]
+            },
+            "parent": "node_19_1542169306252",
+            "context": {
+                "age": "<?@sys-number?>"
+            },
+            "metadata": {
+                "fallback": "leave"
+            },
+            "conditions": "@sys-number >0",
+            "dialog_node": "node_2_1542165444516",
+            "digress_out": "allow_all"
+        },
+        {
+            "type": "standard",
+            "output": {
+                "generic": [
+                    {
+                        "values": [
+                            {
+                                "text": "I give up!"
+                            }
+                        ],
+                        "response_type": "text",
+                        "selection_policy": "sequential"
+                    }
+                ]
+            },
+            "parent": "node_1_1542170153991",
+            "context": {
+                "count_bran": "<?$contador_bran+1?>"
+            },
+            "metadata": {},
+            "next_step": {
+                "behavior": "jump_to",
+                "selector": "body",
+                "dialog_node": "node_1_1542170153991"
+            },
+            "conditions": "anything_else && $count_bran<2",
+            "dialog_node": "node_2_1542219542923",
+            "previous_sibling": "node_1_1542170228261"
+        },
+        {
+            "type": "standard",
+            "title": "Ask car",
+            "output": {
+                "generic": [
+                    {
+                        "values": [
+                            {
+                                "text": "Você possui carro?"
+                            }
+                        ],
+                        "response_type": "text",
+                        "selection_policy": "sequential"
+                    }
+                ]
+            },
+            "parent": "node_2_1542165444516",
+            "metadata": {},
+            "conditions": "true",
+            "dialog_node": "node_2_1542225409110"
+        },
+        {
+            "type": "standard",
+            "output": {
+                "generic": [
+                    {
+                        "values": [],
+                        "response_type": "text",
+                        "selection_policy": "sequential"
+                    }
+                ]
+            },
+            "parent": "node_1_1542170153991",
+            "metadata": {},
+            "next_step": {
+                "behavior": "jump_to",
+                "selector": "body",
+                "dialog_node": "dialog_end"
+            },
+            "conditions": "anything_else",
+            "dialog_node": "node_2_1542226331362",
+            "previous_sibling": "node_2_1542219542923"
+        },
+        {
+            "type": "standard",
+            "title": "Wait for Car Brand",
+            "output": {
+                "generic": [
+                    {
+                        "values": [
+                            {
+                                "text": "Show, você possui um $marcaaCarro"
+                            }
+                        ],
+                        "response_type": "text",
+                        "selection_policy": "sequential"
+                    }
+                ]
+            },
+            "parent": "node_1_1542170228261",
+            "context": {
+                "marcaaCarro": "<?@marcaCarro.literal?>"
+            },
+            "metadata": {},
+            "next_step": {
+                "behavior": "jump_to",
+                "selector": "body",
+                "dialog_node": "dialog_end"
+            },
+            "conditions": "@marcaCarro",
+            "dialog_node": "node_3_1542170479603"
+        },
+        {
+            "type": "standard",
+            "output": {
+                "generic": [
+                    {
+                        "values": [
+                            {
+                                "text": "Não entendi, favor reformular sua resposta."
+                            }
+                        ],
+                        "response_type": "text",
+                        "selection_policy": "sequential"
+                    }
+                ]
+            },
+            "parent": "node_19_1542169306252",
+            "context": {
+                "count_age": "<?count_age+1?>"
+            },
+            "metadata": {},
+            "next_step": {
+                "behavior": "jump_to",
+                "selector": "body",
+                "dialog_node": "node_19_1542169306252"
+            },
+            "conditions": "anything_else && $count_age<2",
+            "dialog_node": "node_5_1542220013281",
+            "previous_sibling": "node_2_1542165444516"
+        },
+        {
+            "type": "standard",
+            "title": "Record name",
+            "output": {
+                "generic": []
+            },
+            "parent": "node_1_1542165421678",
+            "context": {
+                "name": "<?input.text?>"
+            },
+            "metadata": {},
+            "next_step": {
+                "behavior": "jump_to",
+                "selector": "condition",
+                "dialog_node": "node_19_1542169306252"
+            },
+            "conditions": "true",
+            "dialog_node": "node_6_1542224483161"
+        },
+        {
+            "type": "standard",
+            "output": {
+                "generic": [
+                    {
+                        "values": [
+                            {
+                                "text": "Vamos pular a idade!"
+                            }
+                        ],
+                        "response_type": "text",
+                        "selection_policy": "sequential"
+                    }
+                ]
+            },
+            "parent": "node_19_1542169306252",
+            "metadata": {},
+            "next_step": {
+                "behavior": "jump_to",
+                "selector": "condition",
+                "dialog_node": "node_2_1542225409110"
+            },
+            "conditions": "anything_else",
+            "dialog_node": "node_7_1542224637123",
+            "previous_sibling": "node_5_1542220013281"
+        },
+        {
+            "type": "slot",
+            "parent": "node_1_1542165421678",
+            "dialog_node": "slot_16_1542169291266",
+            "previous_sibling": "node_19_1542169306252"
+        },
+        {
+            "type": "slot",
+            "parent": "node_2_1542165444516",
+            "variable": "$number",
+            "dialog_node": "slot_3_1542167054346",
+            "previous_sibling": "node_2_1542225409110"
+        }
+    ],
+    "pagination": {
+        "refresh_url": "/v1/workspaces/73bc27d0-fd05-400a-a382-3616d0d5564b/dialog_nodes?version=2018-02-16"
+    }
+}
