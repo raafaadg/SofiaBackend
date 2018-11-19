@@ -1,0 +1,25 @@
+{
+  "name": "sofiabackend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "dependencies": {
+    "dotenv": "^6.1.0",
+    "prompt-sync": "^4.1.6",
+    "watson-developer-cloud": "^3.13.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/raafaadg/SofiaBackend.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/raafaadg/SofiaBackend/issues"
+  },
+  "homepage": "https://github.com/raafaadg/SofiaBackend#readme"
+}

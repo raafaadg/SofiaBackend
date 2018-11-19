@@ -69,12 +69,12 @@ async function executarUpdateDialog() {
 
 let fimDeConversar = false;
 
-var entitySex = new Object();
-entitySex.entityTag = 'sexo';
-entitySex.entities = ['homem','mulher']
-entitySex.homem = ['home', 'homem', 'homen', 'macho', 'cara', 'men', 'man'];
-entitySex.mulher = ['mulher', 'muié', 'muie', 'fêmea', 'women', 'mulier'];
-entitySex.description = 'Entidade Sexo';
+var entityGender = new Object();
+entityGender.entityTag = 'gerder';
+entityGender.entities = ['homem','mulher']
+entityGender.homem = ['home', 'homem', 'homen', 'macho', 'cara', 'men', 'man'];
+entityGender.mulher = ['mulher', 'muié', 'muie', 'fêmea', 'women', 'mulier'];
+entityGender.description = 'Entidade Genero';
 
 var entityResp = new Object();
 entityResp.entityTag = 'resposta';
@@ -126,9 +126,9 @@ fun.createNewEntity(
 
 fun.createNewEntity(
     workspace_id,
-    entitySex.entityTag,
-    fun.generateEntity(entitySex),
-    entitySex.description)
+    entityGender.entityTag,
+    fun.generateEntity(entityGender),
+    entityGender.description)
 
 fun.createNewEntity(
     workspace_id,
@@ -350,88 +350,6 @@ const dialog_car_brand = fun.skillObject(
     {
         "marcaaCarro": "<?input.text?>"
     }
-)
-
-//Slot number age
-const dialog_number_age = fun.skillObject(
-    workspace_id,
-    'dialog_number_age',
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    'dialog_age',
-    undefined,
-    undefined,
-    undefined,
-    'slot',
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    "$number"
-)
-
-//Slot filho do Dialog Name e após o Wait for name
-const dialog_get_number_age = fun.skillObject(
-    workspace_id,
-    'dialog_get_number_age',
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    'dialog_name',
-    undefined,
-    'dialog_get_name',
-    undefined,
-    'slot'
-)
-
-//Handler sysnumber
-const dialog_handler_sysnumber = fun.skillObject(
-    workspace_id,
-    'dialog_handler_sysnumber',
-    "@sys-number",
-    undefined,
-    undefined,
-    undefined,
-    // 'dialog_number_age',
-    'dialog_age',
-    undefined,
-    undefined,
-    {
-        number: "@sys-number"
-    },
-    'event_handler',
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    "input"
-)
-
-//Dialog Handler Age
-const dialog_handler_age = fun.skillObject(
-    workspace_id,
-    'dialog_handler_age',
-    undefined,
-    {
-        text: "Favor informar sua idade"
-    },
-    undefined,
-    undefined,
-    'dialog_number_age',
-    undefined,
-    'dialog_handler_sysnumber',
-    undefined,
-    'event_handler',
-    undefined,
-    undefined,
-    {},
-    undefined,
-    undefined,
-    'focus'
 )
 
 

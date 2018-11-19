@@ -19,6 +19,7 @@ var chatbot = new watson({
     password: process.env.PASSWORD,
     version: process.env.VERSION,
 });
+
 let fimDeConversar = false;
 
 function generateEntity(obj){
