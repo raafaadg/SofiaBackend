@@ -5,6 +5,7 @@
   "main": "app.js",
   "dependencies": {
     "dotenv": "^6.1.0",
+    "fast-csv": "^2.4.1",
     "prompt-sync": "^4.1.6",
     "watson-developer-cloud": "^3.13.0"
   },

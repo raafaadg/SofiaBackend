@@ -5,63 +5,23 @@ var workspace_id = process.env.WORKSPACE_ID;
 function esperar() {
     return new Promise(
         (resolve, reject) => {
-            setTimeout(resolve, 2000);
+            setTimeout(resolve, 2500);
         }
     )
 }
 
 async function executarCreatDialog() {
-    fun.createNewDialog(dialog_welcome);
-    await esperar();
-    fun.createNewDialog(dialog_name);
-    await esperar();
-    fun.createNewDialog(dialog_get_name);
-    await esperar();
-    fun.createNewDialog(dialog_age);
-    await esperar();
-    fun.createNewDialog(dialog_car);
-    await esperar();
-    fun.createNewDialog(dialog_car_answ);
-    await esperar();
-    fun.createNewDialog(dialog_car_brand);
-    await esperar();
-    fun.createNewDialog(dialog_end);
-    await esperar();
-    fun.createNewDialog(dialog_number_age);
-    await esperar();
-    fun.createNewDialog(dialog_handler_age);
-    await esperar();
-    fun.createNewDialog(dialog_handler_sysnumber);
-    await esperar();
-    fun.createNewDialog(dialog_get_number_age);
-    await esperar();
+    for(let i in arrayDialog){
+        fun.createNewDialog(arrayDialog[i]);
+        await esperar();
+    }
 }
 
 async function executarUpdateDialog() {
-    fun.updateDialog(dialog_welcome);
-    await esperar();
-    fun.updateDialog(dialog_name);
-    await esperar();
-    fun.updateDialog(dialog_get_name);
-    await esperar();
-    fun.updateDialog(dialog_age);
-    await esperar();
-    fun.updateDialog(dialog_car);
-    await esperar();
-    fun.updateDialog(dialog_car_answ);
-    await esperar();
-    fun.updateDialog(dialog_car_brand);
-    await esperar();
-    fun.updateDialog(dialog_end);
-    await esperar();
-    fun.updateDialog(dialog_number_age);
-    await esperar();
-    fun.updateDialog(dialog_handler_age);
-    await esperar();
-    fun.updateDialog(dialog_handler_sysnumber);
-    await esperar();
-    fun.updateDialog(dialog_get_number_age);
-    await esperar();
+    for(let i in arrayDialog){
+        fun.updateDialog(arrayDialog[i]);
+        await esperar();
+    }
 }
 
 //começando a conversação com uma mensagem vazia
@@ -69,7 +29,13 @@ async function executarUpdateDialog() {
 
 let fimDeConversar = false;
 
-var entityGender = new Object();
+const qsts = [
+    'Qual sua idade',
+    'Qua a marca do seu carro?'
+];
+
+function createIntentsAndEntities(){
+    var entityGender = new Object();
 entityGender.entityTag = 'gerder';
 entityGender.entities = ['homem','mulher']
 entityGender.homem = ['home', 'homem', 'homen', 'macho', 'cara', 'men', 'man'];
@@ -147,35 +113,62 @@ fun.createNewIntent(
     intentRecusar.intentTag,
     fun.generateIntent(intentRecusar),
     intentRecusar.description)
+}
 
+
+let arrayDialog = [];
 //Dialogo inicial
 const dialog_welcome = fun.skillObject(
     workspace_id,
-    "dialog_welcome",
+    "Welcome",
     "welcome", 
     {
-        values: [{
-                text: "Olá. Você estaria disposto a responder um rápido questionário?"
-            },
-            {
-                text: "Bom dia, como vai? Você teria um minuto para responder algumas perguntas?"
-            },
-            {
-                text: "Olá, eu sou a Sofia, posso lhe fazer algumas poucas perguntas?"
-            }
-        ],
-        "response_type": "text",
-        "selection_policy": "random"
+        "text": {
+          "values": [
+            "Olá. Você estaria disposto a responder um rápido questionário?",
+            "Bom dia, como vai? Você teria um minuto para responder algumas perguntas?",
+            "Olá, eu sou a Sofia, posso lhe fazer algumas poucas perguntas?"
+          ],
+          "selection_policy": "random"
+        }
     },
     "Bem-vindo",
-    "Dialogo inical",
-    undefined,
-    {
-        behavior: "jump_to",
-        selector: "user_input",
-        dialog_node: "dialog_name"
-    }
+    "Dialogo inical"
 )
+
+arrayDialog.push(dialog_welcome);
+
+const folder_default = fun.skillObject(
+    workspace_id,
+    'folder_default',
+    '#responder && @resposta:sim',
+    undefined,
+    'Default Folder',
+    undefined,
+    undefined,
+    undefined,
+    'Welcome',
+    undefined,
+    'folder'
+)
+arrayDialog.push(folder_default);
+
+
+const folder_qsts = fun.skillObject(
+    workspace_id,
+    'folder_qsts',
+    'true',
+    undefined,
+    'Questions Folder',
+    undefined,
+    undefined,
+    undefined,
+    'folder_default',
+    undefined,
+    'folder'
+)
+arrayDialog.push(folder_qsts);
+
 
 //Dialogo Nome
 const dialog_name = fun.skillObject(
@@ -197,17 +190,10 @@ const dialog_name = fun.skillObject(
     },
     "Dialog name",
     "Dialogo para obter o nome do entrevistado.",
-    undefined,
-    undefined,
-    "dialog_welcome",
-    undefined,
-    undefined,
-    "does_not_return",
-    'allow_all',
-    {
-        fallback: "leave"
-    }
+    'folder_default'
 )
+arrayDialog.push(dialog_name);
+
 
 //Dialogo recebe nome
 const dialog_get_name = fun.skillObject(
@@ -219,7 +205,7 @@ const dialog_get_name = fun.skillObject(
             {
                 values: [
                     {
-                        text: "Prazer $name, para continuarmos, favor informar sua idade."
+                        text: "Prazer $name!."
                     }
                 ],
                 response_type: "text",
@@ -229,25 +215,27 @@ const dialog_get_name = fun.skillObject(
     },
     "Wait for name",
     "Etapa para armazenar o nome do entrevistado",
-    'dialog_name',
+    'folder_default',
     undefined,
-    undefined,
+    "dialog_name",
     {
         name: "<?input.text?>"
     }
 )
+arrayDialog.push(dialog_get_name);
+
 
 //Dialogo idade
 const dialog_age = fun.skillObject(
     workspace_id,
-    "dialog_age",
-    "true",
+    'dialog_age',
+    'true',
     {
         generic: [
             {
                 values: [
                     {
-                        text: "Legal, estamos quase chegando ao fim!"
+                        text: "Poderia me informar sua idade?"
                     }
                 ],
                 response_type: "text",
@@ -255,102 +243,140 @@ const dialog_age = fun.skillObject(
             }
         ]
     },
-    "Dialog Age",
-    "Etapa para armazenar a idade do entrevistado",
+    "Age Question",
+    'Etapa para armazenar a idade do entrevista',
+    'folder_default',
     undefined,
+    'dialog_get_name',
+    {
+        age_count: 0
+    }
+)
+arrayDialog.push(dialog_age);
+
+const dialog_get_age = fun.skillObject(
+    workspace_id,
+    'dialog_get_age',
+    '@sys-number >0',
+    {
+        "text": {
+          "values": [
+            "Obrigado por informar sua idade! -> $age. Qual seu gênero?"
+          ],
+          "selection_policy": "sequential"
+        }
+    },
+    'If Get Age',
+    'Dialogo para armazenar a idade caso ela sejá válida',
+    'dialog_age',
+    {
+        "behavior": "jump_to",
+        "selector": "condition",
+        "dialog_node": "folder_qsts"
+    },
+    undefined,
+    {
+        age: "@sys_number"
+    }
+)
+arrayDialog.push(dialog_get_age);
+
+const dialogo_not_get_age = fun.skillObject(
+    workspace_id,
+    'dialog_not_get_age',
+    'anything_else && $age_count<2',
+    {
+        "text": {
+          "values": [
+            "Não entendi sua resposta, favor reformular."
+          ],
+          "selection_policy": "sequential"
+        }
+    },
+    'If Not Get Age',
+    'Dialogo que ocorre quando a idade informada não é reconhecida',
+    'dialog_age',
+    {
+        "behavior": "jump_to",
+        "selector": "body",
+        "dialog_node": "dialog_age"
+      },
+    'dialog_get_age',
+    {
+        "age_count": "<? $age_count+1 ?>"
+    }
+)
+arrayDialog.push(dialogo_not_get_age);
+
+const dialog_any_age = fun.skillObject(
+    workspace_id,
+    'dialog_any_age',
+    'anything_else',
+    {
+        "text": {
+          "values": [
+            "Sua idade informada foi armazenada! Poderia informar seu gênero?"
+          ],
+          "selection_policy": "sequential"
+        }
+    },
+    'Get Any Age',
+    'Dialogo que armazena qualquer informação enviada pelo entrevistado',
+    'dialog_age',
+    {
+        "behavior": "jump_to",
+        "selector": "condition",
+        "dialog_node": "dialog_gender"
+    },
+    'dialog_not_get_age',
+    {
+        "age": "<? input.text ?>"
+    }
+)
+arrayDialog.push(dialog_any_age);
+
+//Dialogo gênero
+const dialog_gender = fun.skillObject(
+    workspace_id,
+    "dialog_gender",
+    "true",
+    {
+        generic: [
+            {
+                values: [
+                    {
+                        text: "Legal, vamos começar com as perguntas!"
+                    }
+                ],
+                response_type: "text",
+                selection_policy: "sequential"
+            }
+        ]
+    },
+    "Dialog Gender",
+    "Etapa para armazenar o gênero do entrevistado",
+    'folder_default',
     {
         behavior: "jump_to",
         selector: "condition",
-        dialog_node: "dialog_car"
+        dialog_node: "folder_qsts"
     },
-    'dialog_name',
+    'dialog_age',
     {
-        name: "<?input.text?>"
-    },
-    'frame',
-    "does_not_return",
-    "allow_all",
-    {
-        fallback: "leave"
-    },
-    "not_allowed"
-)
-
-//Dialogo carro
-const dialog_car = fun.skillObject(
-    workspace_id,
-    "dialog_car",
-    "true",
-    {
-        generic: [
-            {
-                values: [
-                    {
-                        text: "Você possui carro?"
-                    }
-                ],
-                response_type: "text",
-                selection_policy: "sequential"
-            }
-        ]
-    },
-    "Dialog Car",
-    "Etapa para perguntar se o entrevistado possui carro",
-    undefined,
-    undefined,
-    'dialog_age'
-)
-
-//Dialogo possui carro
-const dialog_car_answ = fun.skillObject(
-    workspace_id,
-    "dialog_car_answ",
-    "@resposta:sim",
-    {
-        generic: [
-            {
-                values: [
-                    {
-                        text: "Qual a marca do seu carro?"
-                    }
-                ],
-                response_type: "text",
-                selection_policy: "sequential"
-            }
-        ]
-    },
-    "Wait for Car Answ",
-    "Etapa para perguntar a marca do carro do entrevista.",
-    'dialog_car'
-)
-
-//Dialogo marca do carro
-const dialog_car_brand = fun.skillObject(
-    workspace_id,
-    "dialog_car_brand",
-    "@carBrand",
-    {
-        generic: [
-            {
-                values: [
-                    {
-                        text: "Show, você possui um $carBrand"
-                    }
-                ],
-                response_type: "text",
-                selection_policy: "sequential"
-            }
-        ]
-    },
-    "Wait for Car Brand",
-    "Etapa para armazenar a marcar do carro do entrevistado",
-    "dialog_car",
-    undefined,
-    'dialog_car_answ',
-    {
-        "marcaaCarro": "<?input.text?>"
+        gender: "<?entity.literal?>"
     }
 )
+arrayDialog.push(dialog_gender);
+
+
+// let dialog = ''
+// for(let i in qsts){
+//     let obj = {}
+//     obj = fun.skillObject(
+//         workspace_id,
+
+//     )
+// }
 
 
 //Dialog End
@@ -359,24 +385,25 @@ const dialog_end = fun.skillObject(
     "dialog_end",
     "anything_else || #recusar",
     {
-        values: [{
-                text: "Agradeço pelo seu tempo. Tenha um ótimo dia!"
-            },
-            {
-                text: "Muito obrigado por sua atenção, até a próxima!"
-            },
-            {
-                text: "Obriagdo por seu tempo, até mais!"
-            }
-        ],
-        "response_type": "text",
-        "selection_policy": "random"
+        "text": {
+          "values": [
+            "Agradeço pelo seu tempo. Tenha um ótimo dia!",
+            "Muito obrigado por sua atenção, até a próxima!",
+            "Obriagdo por seu tempo, até mais!"
+          ],
+          "response_type": "text",
+          "selection_policy": "random"
+        }
     },
     "Em outros casos",
-    "Dialogo Final"
-    )
+    "Dialogo Final",
+    undefined,
+    undefined,
+    'folder_qsts'
+)
+arrayDialog.push(dialog_end);
 
-
+// createIntentsAndEntities();
 executarCreatDialog().then(
 executarUpdateDialog);
 
