@@ -1,6 +1,6 @@
-var fun = require('./functions');
+const fun = require('./functions');
 
-var workspace_id = process.env.WORKSPACE_ID;
+const workspace_id = process.env.WORKSPACE_ID;
 
 function esperar() {
     return new Promise(
@@ -30,33 +30,42 @@ async function executarUpdateDialog() {
 let fimDeConversar = false;
 
 const qsts = [
-    'Qual sua idade',
+    'Qual sua cor preferida?',
     'Qua a marca do seu carro?'
 ];
 
 function createIntentsAndEntities(){
-    var entityGender = new Object();
-entityGender.entityTag = 'gerder';
+
+const entityGender = new Object();
+entityGender.entityTag = 'gender';
 entityGender.entities = ['homem','mulher']
-entityGender.homem = ['home', 'homem', 'homen', 'macho', 'cara', 'men', 'man'];
-entityGender.mulher = ['mulher', 'muié', 'muie', 'fêmea', 'women', 'mulier'];
+entityGender.homem = ['home', 'homem', 'homen', 'macho', 'cara', 'men', 'man','masc', 'masculino'];
+entityGender.mulher = ['mulher', 'muié', 'muie', 'fêmea', 'women', 'mulier', 'fem','femi','femino'];
 entityGender.description = 'Entidade Genero';
 
-var entityResp = new Object();
+const entityResp = new Object();
 entityResp.entityTag = 'resposta';
 entityResp.entities = ['sim', 'nao'];
 entityResp.sim = ['sim', 'claro', 'posso', 'pode fazer', 'aceito', 'yes', 'go', 'partiu', 'vamos', 'bora'];
 entityResp.nao = ['não', 'agora não', 'não posso', 'depois', 'no', 'nope', 'nem'];
 entityResp.description = 'Entidade Resposta';
 
-var entityCarBrand = new Object();
+const entityCarBrand = new Object();
 entityCarBrand.entityTag = 'carBrand';
 entityCarBrand.entities = ['carBrand'];
 entityCarBrand.carBrand = ['ford','nissan','honda','hyundai','chevrolet','kia','renault','mercedes-benz',
                             'peugeot','bmw','audi','maruti','mazda','fiat','jeep','changan','geely','buick'];
 entityCarBrand.description = 'Entidade Marcas de carros';
 
-var intentResp = new Object();
+const entityColor = {
+    entityTag: 'color',
+    entities: ['color'],
+    color: ['cinza', 'preto', 'branco', 'verde', 'vermelho', 'marrom', 'roxo', 'amarelo', 'laranja', 'rosa', 'azul'],
+    description: 'Entidade cores'
+}
+
+
+const intentResp = new Object();
 intentResp.intentTag = 'responder';
 intentResp.description = 'Intenção de responder a pesquisa';
 intentResp.examples = [
@@ -69,7 +78,7 @@ intentResp.examples = [
     'Sim',
     'Claro'];
 
-var intentRecusar = new Object();
+const intentRecusar = new Object();
 intentRecusar.intentTag = 'recusar';
 intentRecusar.description = 'Intenção de recusar responder a pesquisa';
 intentRecusar.examples = [
@@ -102,6 +111,12 @@ fun.createNewEntity(
     fun.generateEntity(entityResp),
     entityResp.description)
 
+fun.createNewEntity(
+    workspace_id,
+    entityColor.entityTag,
+    fun.generateEntity(entityColor),
+    entityColor.description)
+
 fun.createNewIntent(
     workspace_id,
     intentResp.intentTag,
@@ -113,6 +128,7 @@ fun.createNewIntent(
     intentRecusar.intentTag,
     fun.generateIntent(intentRecusar),
     intentRecusar.description)
+
 }
 
 
@@ -141,7 +157,7 @@ arrayDialog.push(dialog_welcome);
 const folder_default = fun.skillObject(
     workspace_id,
     'folder_default',
-    '#responder && @resposta:sim',
+    '#responder || @resposta:sim',
     undefined,
     'Default Folder',
     undefined,
@@ -174,7 +190,7 @@ arrayDialog.push(folder_qsts);
 const dialog_name = fun.skillObject(
     workspace_id,
     "dialog_name",
-    "#responder",
+    "true",
     {
         generic: [
             {
@@ -190,39 +206,16 @@ const dialog_name = fun.skillObject(
     },
     "Dialog name",
     "Dialogo para obter o nome do entrevistado.",
-    'folder_default'
+    'folder_default',
+    {
+        behavior: "jump_to",
+        selector: "user_input",
+        dialog_node: "dialog_age"
+    }
 )
 arrayDialog.push(dialog_name);
 
 
-//Dialogo recebe nome
-const dialog_get_name = fun.skillObject(
-    workspace_id,
-    "dialog_get_name",
-    "true",
-    {
-        generic: [
-            {
-                values: [
-                    {
-                        text: "Prazer $name!."
-                    }
-                ],
-                response_type: "text",
-                selection_policy: "sequential"
-            }
-        ]
-    },
-    "Wait for name",
-    "Etapa para armazenar o nome do entrevistado",
-    'folder_default',
-    undefined,
-    "dialog_name",
-    {
-        name: "<?input.text?>"
-    }
-)
-arrayDialog.push(dialog_get_name);
 
 
 //Dialogo idade
@@ -235,7 +228,7 @@ const dialog_age = fun.skillObject(
             {
                 values: [
                     {
-                        text: "Poderia me informar sua idade?"
+                        text: "Prazer $name! Poderia me informar sua idade?"
                     }
                 ],
                 response_type: "text",
@@ -247,9 +240,10 @@ const dialog_age = fun.skillObject(
     'Etapa para armazenar a idade do entrevista',
     'folder_default',
     undefined,
-    'dialog_get_name',
+    'dialog_name',
     {
-        age_count: 0
+        age_count: 0,
+        name: "<?input.text?>"
     }
 )
 arrayDialog.push(dialog_age);
@@ -272,11 +266,11 @@ const dialog_get_age = fun.skillObject(
     {
         "behavior": "jump_to",
         "selector": "condition",
-        "dialog_node": "folder_qsts"
+        "dialog_node": "dialog_wait_gender"
     },
     undefined,
     {
-        age: "@sys_number"
+        age: "<?@sys-number?>"
     }
 )
 arrayDialog.push(dialog_get_age);
@@ -326,7 +320,7 @@ const dialog_any_age = fun.skillObject(
     {
         "behavior": "jump_to",
         "selector": "condition",
-        "dialog_node": "dialog_gender"
+        "dialog_node": "dialog_wait_gender"
     },
     'dialog_not_get_age',
     {
@@ -334,6 +328,20 @@ const dialog_any_age = fun.skillObject(
     }
 )
 arrayDialog.push(dialog_any_age);
+
+//Dialogo espera pelo Gênero
+const dialog_wait_gender = fun.skillObject(
+    workspace_id,
+    'dialog_wait_gender',
+    'true',
+    undefined,
+    'Get Gender',
+    'Espera o entrevistado informar seu genêro.',
+    'folder_default',
+    undefined,
+    'dialog_age'
+)
+arrayDialog.push(dialog_wait_gender);
 
 //Dialogo gênero
 const dialog_gender = fun.skillObject(
@@ -345,7 +353,7 @@ const dialog_gender = fun.skillObject(
             {
                 values: [
                     {
-                        text: "Legal, vamos começar com as perguntas!"
+                        text: "Gênero registrado! Por qual canal você prefere responder às pesquisas(SMS, WhatsAPP,etc)?"
                     }
                 ],
                 response_type: "text",
@@ -355,29 +363,88 @@ const dialog_gender = fun.skillObject(
     },
     "Dialog Gender",
     "Etapa para armazenar o gênero do entrevistado",
+    'dialog_wait_gender',
+    {
+        behavior: "jump_to",
+        selector: "user_input",
+        dialog_node: "dialog_optin"
+    },
+    undefined,
+    {
+        gender: "<?entities[0].value?>"
+    }
+)
+arrayDialog.push(dialog_gender);
+
+//Dialogo Opt-in
+const dialog_optin = fun.skillObject(
+    workspace_id,
+    'dialog_optin',
+    'true',
+    {
+        generic: [
+            {
+                values: [
+                    {
+                        text: "Canal registrado! Você aceita ser contactado pelo canal preferido?"
+                    }
+                ],
+                response_type: "text",
+                selection_policy: "sequential"
+            }
+        ]
+    },
+    "Aks Opt In",
+    'Dialogo para perguntar o Opt In',
+    'folder_default',
+    {
+        behavior: "jump_to",
+        selector: "user_input",
+        dialog_node: "dialog_final_default"
+    },
+    'dialog_wait_gender',
+    {
+        prefChannel: "<?input.text?>"
+    }
+
+)
+arrayDialog.push(dialog_optin);
+
+//Dialogo Opt-in
+const dialog_final_default = fun.skillObject(
+    workspace_id,
+    'dialog_final_default',
+    'true',
+    {
+        generic: [
+            {
+                values: [
+                    {
+                        text: "Pronto! Vamos começar com as perguntas."
+                    }
+                ],
+                response_type: "text",
+                selection_policy: "sequential"
+            }
+        ]
+    },
+    "Final Qts Default",
+    'Dialogo final da sessão default',
     'folder_default',
     {
         behavior: "jump_to",
         selector: "condition",
         dialog_node: "folder_qsts"
     },
-    'dialog_age',
+    'dialog_optin',
     {
-        gender: "<?entity.literal?>"
+        optin: "<?entities[0].value?>"
     }
+
 )
-arrayDialog.push(dialog_gender);
+arrayDialog.push(dialog_final_default);
 
-
-// let dialog = ''
-// for(let i in qsts){
-//     let obj = {}
-//     obj = fun.skillObject(
-//         workspace_id,
-
-//     )
-// }
-
+arrayDialog = fun.generateQuestion(objQts,arrayDialog)
 
 //Dialog End
 const dialog_end = fun.skillObject(
@@ -403,7 +470,6 @@ const dialog_end = fun.skillObject(
 )
 arrayDialog.push(dialog_end);
 
-// createIntentsAndEntities();
+createIntentsAndEntities();
 executarCreatDialog().then(
 executarUpdateDialog);
-

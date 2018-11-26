@@ -9,7 +9,8 @@ module.exports = {
     generateEntity,
     generateIntent,
     skillObject,
-    updateDialog
+    updateDialog,
+    generateQuestion
 }
 var prompt = require('prompt-sync')();
 require('dotenv').config();
@@ -202,4 +203,13 @@ function updateDialog(obj) {
             console.log(JSON.stringify(response, null, 2));
         }
     });
+}
+
+
+function generateQuestion(obj, arrayDialog){
+    obj.qts.forEach(element => {
+                
+        arrayDialog.push(objDialog)
+    });
+    return arrayDialog
 }
