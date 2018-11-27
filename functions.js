@@ -259,7 +259,7 @@ function generateQuestion(obj, arrayDialog,workspace_id){
         parent,
         {
             behavior: "jump_to",
-            selector: "response",
+            selector: "body",
             dialog_node: "dialog_end"
         },
         previous_sibling,
