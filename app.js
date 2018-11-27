@@ -28,10 +28,13 @@ async function executarUpdateDialog() {
 //chatbot.message({workspace_id}, trataResposta);
 
 let fimDeConversar = false;
+let arrayDialog = [];
+let arrayEntities = [];
 
 const qsts = [
     'Qual sua cor preferida?',
-    'Qua a marca do seu carro?'
+    'Qua a marca do seu carro?',
+    'Você é solteiro?'
 ];
 
 function createIntentsAndEntities(){
@@ -50,19 +53,21 @@ entityResp.sim = ['sim', 'claro', 'posso', 'pode fazer', 'aceito', 'yes', 'go', 
 entityResp.nao = ['não', 'agora não', 'não posso', 'depois', 'no', 'nope', 'nem'];
 entityResp.description = 'Entidade Resposta';
 
-const entityCarBrand = new Object();
-entityCarBrand.entityTag = 'carBrand';
-entityCarBrand.entities = ['carBrand'];
-entityCarBrand.carBrand = ['ford','nissan','honda','hyundai','chevrolet','kia','renault','mercedes-benz',
-                            'peugeot','bmw','audi','maruti','mazda','fiat','jeep','changan','geely','buick'];
-entityCarBrand.description = 'Entidade Marcas de carros';
-
 const entityColor = {
     entityTag: 'color',
     entities: ['color'],
     color: ['cinza', 'preto', 'branco', 'verde', 'vermelho', 'marrom', 'roxo', 'amarelo', 'laranja', 'rosa', 'azul'],
     description: 'Entidade cores'
 }
+arrayEntities.push(entityColor)
+
+const entityCarBrand = new Object();
+entityCarBrand.entityTag = 'carBrand';
+entityCarBrand.entities = ['carBrand'];
+entityCarBrand.carBrand = ['ford','nissan','honda','hyundai','chevrolet','kia','renault','mercedes-benz',
+                            'peugeot','bmw','audi','maruti','mazda','fiat','jeep','changan','geely','buick'];
+entityCarBrand.description = 'Entidade Marcas de carros';
+arrayEntities.push(entityCarBrand)
 
 
 const intentResp = new Object();
@@ -128,11 +133,23 @@ fun.createNewIntent(
     intentRecusar.intentTag,
     fun.generateIntent(intentRecusar),
     intentRecusar.description)
-
 }
 
+dialogObj = [
+    dialog1 = {
+        qst: qsts[0],
+        entity: arrayEntities[0]
+    },
+    dialog2 = {
+        qst: qsts[1],
+        entity: arrayEntities[1]
+    },
+    dialog3 = {
+        qst: qsts[3],
+        entity: null
+    }
+]
 
-let arrayDialog = [];
 //Dialogo inicial
 const dialog_welcome = fun.skillObject(
     workspace_id,
@@ -444,7 +461,7 @@ const dialog_final_default = fun.skillObject(
 )
 arrayDialog.push(dialog_final_default);
 
-arrayDialog = fun.generateQuestion(objQts,arrayDialog)
+arrayDialog = fun.generateQuestion(dialogObj,arrayDialog,workspace_id)
 
 //Dialog End
 const dialog_end = fun.skillObject(
@@ -473,3 +490,4 @@ arrayDialog.push(dialog_end);
 createIntentsAndEntities();
 executarCreatDialog().then(
 executarUpdateDialog);
+

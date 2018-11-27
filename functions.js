@@ -206,10 +206,65 @@ function updateDialog(obj) {
 }
 
 
-function generateQuestion(obj, arrayDialog){
-    obj.qts.forEach(element => {
-                
-        arrayDialog.push(objDialog)
+function generateQuestion(obj, arrayDialog,workspace_id){
+    const parent = 'folder_qsts';
+    let i = 0;
+    let previous_sibling = undefined;
+    let context = undefined;
+    const varAux = 'varAux';
+    let varContext = '';
+    obj.forEach(element => {
+        arrayDialog.push(skillObject(
+            workspace_id,
+            'node'+i,
+            'true',
+            {
+                "text": {
+                  "values": [
+                    element.qst
+                  ],
+                  "response_type": "text",
+                  "selection_policy": "random"
+                }
+            },
+            'node'+i,
+            'Dialogo de perguntas gerado automáticamente - node'+i,
+            parent,
+            undefined,
+            previous_sibling,
+            context
+        ));
+        previous_sibling = 'node'+i;
+        varContext = varAux + (i);
+        context = {
+            varContext: "<?input.text?>"
+        }
+        i++;
     });
+    arrayDialog.push(skillObject(
+        workspace_id,
+        'node'+i,
+        'true',
+        {
+            "text": {
+              "values": [
+                "FIM!"
+              ],
+              "response_type": "text",
+              "selection_policy": "random"
+            }
+        },
+        'node'+i,
+        'Dialogo de perguntas gerado automáticamente - node'+i,
+        parent,
+        {
+            behavior: "jump_to",
+            selector: "response",
+            dialog_node: "dialog_end"
+        },
+        previous_sibling,
+        context
+    ));
+
     return arrayDialog
 }
