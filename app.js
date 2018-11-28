@@ -37,7 +37,6 @@ const qsts = [
     'Você é solteiro?'
 ];
 
-function createIntentsAndEntities(){
 
 const entityGender = new Object();
 entityGender.entityTag = 'gender';
@@ -52,6 +51,13 @@ entityResp.entities = ['sim', 'nao'];
 entityResp.sim = ['sim', 'claro', 'posso', 'pode fazer', 'aceito', 'yes', 'go', 'partiu', 'vamos', 'bora'];
 entityResp.nao = ['não', 'agora não', 'não posso', 'depois', 'no', 'nope', 'nem'];
 entityResp.description = 'Entidade Resposta';
+
+const entityOptin = {
+    entityTag: 'optin',
+    entities: ['optin'],
+    optin: ['sms','whats','whatsapp','app','tele','telegram','ligação','tel','fone','msg','zap','zapzap','face','facebook','twitter','tuiti','insta','instagram'],
+    description: 'Entidade cores'
+}
 
 const entityColor = {
     entityTag: 'color',
@@ -98,41 +104,49 @@ intentRecusar.examples = [
     "Não me incomode mais"
 ];
 
-fun.createNewEntity(
-    workspace_id,
-    entityCarBrand.entityTag,
-    fun.generateEntity(entityCarBrand),
-    entityCarBrand.description)
+function createIntentsAndEntities(){
 
-fun.createNewEntity(
-    workspace_id,
-    entityGender.entityTag,
-    fun.generateEntity(entityGender),
-    entityGender.description)
+    fun.createNewEntity(
+        workspace_id,
+        entityCarBrand.entityTag,
+        fun.generateEntity(entityCarBrand),
+        entityCarBrand.description)
 
-fun.createNewEntity(
-    workspace_id,
-    entityResp.entityTag,
-    fun.generateEntity(entityResp),
-    entityResp.description)
+    fun.createNewEntity(
+        workspace_id,
+        entityGender.entityTag,
+        fun.generateEntity(entityGender),
+        entityGender.description)
 
-fun.createNewEntity(
-    workspace_id,
-    entityColor.entityTag,
-    fun.generateEntity(entityColor),
-    entityColor.description)
+    fun.createNewEntity(
+        workspace_id,
+        entityResp.entityTag,
+        fun.generateEntity(entityResp),
+        entityResp.description)
 
-fun.createNewIntent(
-    workspace_id,
-    intentResp.intentTag,
-    fun.generateIntent(intentResp),
-    intentResp.description)
+    fun.createNewEntity(
+        workspace_id,
+        entityColor.entityTag,
+        fun.generateEntity(entityColor),
+        entityColor.description)
 
-fun.createNewIntent(
-    workspace_id,
-    intentRecusar.intentTag,
-    fun.generateIntent(intentRecusar),
-    intentRecusar.description)
+    fun.createNewEntity(
+        workspace_id,
+        entityOptin.entityTag,
+        fun.generateEntity(entityOptin),
+        entityOptin.description)
+
+    fun.createNewIntent(
+        workspace_id,
+        intentResp.intentTag,
+        fun.generateIntent(intentResp),
+        intentResp.description)
+
+    fun.createNewIntent(
+        workspace_id,
+        intentRecusar.intentTag,
+        fun.generateIntent(intentRecusar),
+        intentRecusar.description)
 }
 
 dialogObj = [
@@ -145,10 +159,17 @@ dialogObj = [
         entity: arrayEntities[1]
     },
     dialog3 = {
-        qst: qsts[3],
+        qst: qsts[2],
         entity: null
     }
 ]
+
+let CountArray = {};
+let contrCountArray = 0;
+dialogObj.forEach(element => {
+    CountArray['node'+contrCountArray+'_count'] = 0;
+    contrCountArray++;
+});
 
 //Dialogo inicial
 const dialog_welcome = fun.skillObject(
@@ -166,7 +187,11 @@ const dialog_welcome = fun.skillObject(
         }
     },
     "Bem-vindo",
-    "Dialogo inical"
+    "Dialogo inical",
+    undefined,
+    undefined,
+    undefined,
+    CountArray
 )
 
 arrayDialog.push(dialog_welcome);
@@ -190,7 +215,7 @@ arrayDialog.push(folder_default);
 const folder_qsts = fun.skillObject(
     workspace_id,
     'folder_qsts',
-    'true',
+    'false',
     undefined,
     'Questions Folder',
     undefined,
@@ -227,12 +252,31 @@ const dialog_name = fun.skillObject(
     {
         behavior: "jump_to",
         selector: "user_input",
-        dialog_node: "dialog_age"
+        dialog_node: "dialog_get_name"
     }
 )
 arrayDialog.push(dialog_name);
 
-
+//Dialogo Nome
+const dialog_get_name = fun.skillObject(
+    workspace_id,
+    "dialog_get_name",
+    "true",
+    undefined,
+    "Dialog name",
+    "Dialogo para obter o nome do entrevistado.",
+    'dialog_name',
+    {
+        behavior: "jump_to",
+        selector: "condition",
+        dialog_node: "dialog_age"
+    },
+    undefined,
+    {
+        name: "<?input.text?>"
+    }
+)
+arrayDialog.push(dialog_get_name);
 
 
 //Dialogo idade
@@ -259,8 +303,7 @@ const dialog_age = fun.skillObject(
     undefined,
     'dialog_name',
     {
-        age_count: 0,
-        name: "<?input.text?>"
+        age_count: 0
     }
 )
 arrayDialog.push(dialog_age);
@@ -421,7 +464,7 @@ const dialog_optin = fun.skillObject(
     },
     'dialog_wait_gender',
     {
-        prefChannel: "<?input.text?>"
+        prefChannel: "<?entities[0].value?>"
     }
 
 )
@@ -451,7 +494,7 @@ const dialog_final_default = fun.skillObject(
     {
         behavior: "jump_to",
         selector: "condition",
-        dialog_node: "folder_qsts"
+        dialog_node: "node0"
     },
     'dialog_optin',
     {
@@ -460,7 +503,6 @@ const dialog_final_default = fun.skillObject(
 
 )
 arrayDialog.push(dialog_final_default);
-
 arrayDialog = fun.generateQuestion(dialogObj,arrayDialog,workspace_id)
 
 //Dialog End
@@ -487,7 +529,10 @@ const dialog_end = fun.skillObject(
 )
 arrayDialog.push(dialog_end);
 
-createIntentsAndEntities();
+// createIntentsAndEntities();
+
 executarCreatDialog().then(
 executarUpdateDialog);
+
+// executarUpdateDialog();
 

@@ -210,61 +210,224 @@ function generateQuestion(obj, arrayDialog,workspace_id){
     const parent = 'folder_qsts';
     let i = 0;
     let previous_sibling = undefined;
-    let context = undefined;
-    const varAux = 'varAux';
-    let varContext = '';
+    let contextAux = {};
+    let nodeName = '';
+    let nodeCount = '';
+    let varEntity = '';
+    let next_dialog_node = '';
+    let entityControl = false;
     obj.forEach(element => {
-        arrayDialog.push(skillObject(
-            workspace_id,
-            'node'+i,
-            'true',
-            {
-                "text": {
-                  "values": [
-                    element.qst
-                  ],
-                  "response_type": "text",
-                  "selection_policy": "random"
-                }
-            },
-            'node'+i,
-            'Dialogo de perguntas gerado automáticamente - node'+i,
-            parent,
-            undefined,
-            previous_sibling,
-            context
-        ));
-        previous_sibling = 'node'+i;
-        varContext = varAux + (i);
-        context = {
-            varContext: "<?input.text?>"
+        nodeName = 'node'+i;
+        nodeCount = nodeName+'_count';
+        contextAux[nodeCount] = 0;
+        if(element.entity != null)
+        {
+            entityControl = true;
+            varEntity = element.entity.entityTag;
+        }else{
+            entityControl = false;
         }
+
+        if(i < (Object.keys(obj).length-1))
+        {
+            next_dialog_node = "node"+(i+1);
+
+        }else
+        {
+            next_dialog_node = 'dialog_end';
+        }
+        if(entityControl)
+        {   
+            arrayDialog.push(skillObject(
+                workspace_id,
+                nodeName,
+                'true',
+                {
+                    "text": {
+                    "values": [
+                        element.qst
+                    ],
+                    "response_type": "text",
+                    "selection_policy": "random"
+                    }
+                },
+                'Question Entity - ' + varEntity,
+                'Dialogo de perguntas gerado automáticamente - '+ nodeName,
+                parent,
+                undefined,
+                previous_sibling,
+                contextAux
+            ));
+            arrayDialog.push(skillObject(
+                workspace_id,
+                nodeName+1,
+                '@'+varEntity,
+                {
+                    "text":{
+                        "values":[
+                            "Entidade " + varEntity + " cadastrada"
+                        ]
+                    }
+                },
+                'If Get ' + varEntity,
+                'Dialogo para verificar se a entidade ' + varEntity + ' foi enconrada',
+                nodeName,
+                {
+                    behavior: "jump_to",
+                    selector: "condition",
+                    dialog_node: next_dialog_node
+                },
+                undefined,
+                {
+                    varEntity: '@'+varEntity+'.literal'
+                }
+            ));
+            arrayDialog.push(skillObject(
+                workspace_id,
+                nodeName+2,
+                "anything_else&&"+nodeCount+"<2",
+                {
+                    "text":{
+                        "values":[
+                            "Não entendi sua resposta, favor reformular."
+                        ]
+                    }
+                },
+                'If Not Get ' + varEntity,
+                'Dialogo para caso não encontre a entidade ' + varEntity,
+                nodeName,
+                {
+                    behavior: "jump_to",
+                    selector: "condition",
+                    dialog_node: nodeName
+                },
+                nodeName+1,
+                {
+                    nodeCount: "<?$" + nodeCount + "+1?>"
+                }
+            ));
+            arrayDialog.push(skillObject(
+                workspace_id,
+                nodeName+3,
+                'anything_else',
+                {
+                    "text":{
+                        "values":[
+                            "A resposta informada foi armazenada!"
+                        ]
+                    }
+                },
+                'Get Any ' + varEntity,
+                'Dialogo pra armazenar qualquer resposta fornecida',
+                nodeName,
+                {
+                    behavior: "jump_to",
+                    selector: "condition",
+                    dialog_node: next_dialog_node
+                },
+                nodeName+2,
+                {
+                    nodeCount: "<? input.text ?>"
+                }
+
+            ));
+        }else{
+            arrayDialog.push(skillObject(
+                workspace_id,
+                nodeName,
+                'true',
+                {
+                    "text": {
+                    "values": [
+                        element.qst
+                    ],
+                    "response_type": "text",
+                    "selection_policy": "random"
+                    }
+                },
+                'Question Boolean',
+                'Dialogo de perguntas gerado automáticamente - '+ nodeName,
+                parent,
+                undefined,
+                previous_sibling,
+                contextAux
+            ));
+            arrayDialog.push(skillObject(
+                workspace_id,
+                nodeName+1,
+                '@resposta',
+                {
+                    "text":{
+                        "values":[
+                            "Resposta registrada -> <?entities[0].value?>"
+                        ]
+                    }
+                },
+                'If Get Yes',
+                'Dialogo para verificar se a resposta foi positiva',
+                nodeName,
+                {
+                    behavior: "jump_to",
+                    selector: "condition",
+                    dialog_node: next_dialog_node
+                },
+                undefined,
+                {
+                    varEntity: '@resposta.literal'
+                }
+            ));
+            arrayDialog.push(skillObject(
+                workspace_id,
+                nodeName+2,
+                "anything_else&&"+nodeCount+"<2",
+                {
+                    "text":{
+                        "values":[
+                            "Não entendi sua resposta, favor reformular."
+                        ]
+                    }
+                },
+                'If Not Get Entity @resposta',
+                'Dialogo para caso não encontre a entidade resposta',
+                nodeName,
+                {
+                    behavior: "jump_to",
+                    selector: "condition",
+                    dialog_node: nodeName
+                },
+                nodeName+1,
+                {
+                    nodeCount: "<?$" + nodeCount + "+1?>"
+                }
+            ));
+            arrayDialog.push(skillObject(
+                workspace_id,
+                nodeName+3,
+                'anything_else',
+                {
+                    "text":{
+                        "values":[
+                            "A resposta informada foi armazenada!"
+                        ]
+                    }
+                },
+                'Get Any Entity',
+                'Dialogo pra armazenar qualquer resposta fornecida',
+                nodeName,
+                {
+                    behavior: "jump_to",
+                    selector: "condition",
+                    dialog_node: next_dialog_node
+                },
+                nodeName+2,
+                {
+                    nodeCount: "<? input.text ?>"
+                }
+
+            ));
+        }
+        previous_sibling = nodeName;
         i++;
     });
-    arrayDialog.push(skillObject(
-        workspace_id,
-        'node'+i,
-        'true',
-        {
-            "text": {
-              "values": [
-                "FIM!"
-              ],
-              "response_type": "text",
-              "selection_policy": "random"
-            }
-        },
-        'node'+i,
-        'Dialogo de perguntas gerado automáticamente - node'+i,
-        parent,
-        {
-            behavior: "jump_to",
-            selector: "body",
-            dialog_node: "dialog_end"
-        },
-        previous_sibling,
-        context
-    ));
-
     return arrayDialog
 }
