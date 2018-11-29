@@ -529,10 +529,10 @@ const dialog_end = fun.skillObject(
 )
 arrayDialog.push(dialog_end);
 
-// createIntentsAndEntities();
+createIntentsAndEntities();
 
-executarCreatDialog().then(
-executarUpdateDialog);
+// executarCreatDialog().then(
+// executarUpdateDialog);
 
 // executarUpdateDialog();
 

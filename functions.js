@@ -219,7 +219,7 @@ function generateQuestion(obj, arrayDialog,workspace_id){
     obj.forEach(element => {
         nodeName = 'node'+i;
         nodeCount = nodeName+'_count';
-        contextAux[nodeCount] = 0;
+        contextAux[nodeCount] = {};
         if(element.entity != null)
         {
             entityControl = true;
@@ -255,8 +255,7 @@ function generateQuestion(obj, arrayDialog,workspace_id){
                 'Dialogo de perguntas gerado automáticamente - '+ nodeName,
                 parent,
                 undefined,
-                previous_sibling,
-                contextAux
+                previous_sibling
             ));
             arrayDialog.push(skillObject(
                 workspace_id,
@@ -282,6 +281,7 @@ function generateQuestion(obj, arrayDialog,workspace_id){
                     varEntity: '@'+varEntity+'.literal'
                 }
             ));
+            contextAux[nodeCount] = "<?$" + nodeCount + "+1?>";
             arrayDialog.push(skillObject(
                 workspace_id,
                 nodeName+2,
@@ -302,10 +302,9 @@ function generateQuestion(obj, arrayDialog,workspace_id){
                     dialog_node: nodeName
                 },
                 nodeName+1,
-                {
-                    nodeCount: "<?$" + nodeCount + "+1?>"
-                }
+                contextAux                
             ));
+            contextAux[nodeCount] = "<? input.text ?>";
             arrayDialog.push(skillObject(
                 workspace_id,
                 nodeName+3,
@@ -326,10 +325,7 @@ function generateQuestion(obj, arrayDialog,workspace_id){
                     dialog_node: next_dialog_node
                 },
                 nodeName+2,
-                {
-                    nodeCount: "<? input.text ?>"
-                }
-
+                contextAux
             ));
         }else{
             arrayDialog.push(skillObject(
@@ -349,8 +345,7 @@ function generateQuestion(obj, arrayDialog,workspace_id){
                 'Dialogo de perguntas gerado automáticamente - '+ nodeName,
                 parent,
                 undefined,
-                previous_sibling,
-                contextAux
+                previous_sibling
             ));
             arrayDialog.push(skillObject(
                 workspace_id,
@@ -376,6 +371,7 @@ function generateQuestion(obj, arrayDialog,workspace_id){
                     varEntity: '@resposta.literal'
                 }
             ));
+            contextAux[nodeCount] = "<?$" + nodeCount + "+1?>";
             arrayDialog.push(skillObject(
                 workspace_id,
                 nodeName+2,
@@ -400,6 +396,7 @@ function generateQuestion(obj, arrayDialog,workspace_id){
                     nodeCount: "<?$" + nodeCount + "+1?>"
                 }
             ));
+            contextAux[nodeCount] = "<? input.text ?>";
             arrayDialog.push(skillObject(
                 workspace_id,
                 nodeName+3,
